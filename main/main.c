@@ -10,21 +10,15 @@
 #include <stdio.h>
 #include <stdint.h>
 
-extern "C"
-{
-	void app_main(void);
-}
-
 #define WATCHDOG_TIMEOUT_S 5
 
 void myTask(void *myData)
 {
 
-	printf("# Registering our new task with the task watchdog.\n");
-	esp_task_wdt_add(NULL);
-
 	while (1)
 	{
+	printf("Registering myTask with the Task Watchdog timer.\n");
+	esp_task_wdt_add(NULL);
 
 		for (int i = 0; i < 5; i++)
 		{
@@ -32,10 +26,9 @@ void myTask(void *myData)
 			printf("Tick :%d\n", i);
 		}
 
-		printf("# Our current task priority is %d.\n", uxTaskPriorityGet(NULL));
-		esp_task_wdt_reset();
-
-		printf("# Removing our watchdog registration before we end the task.\n");
+printf("Reset and Delete watchdog registration of this task.\n");		
+esp_task_wdt_reset();
+		
 		esp_task_wdt_delete(NULL);
 	}
 	vTaskDelete(NULL);
@@ -45,18 +38,10 @@ void app_main(void)
 {
 
 	printf("App starting\n");
-	printf("Initializing the task watchdog subsystem with an interval of 4 seconds.\n");
 
-	// task watchdog timer timeout of 4sec
+	printf("Initializing the task watchdog.\n");
 	esp_task_wdt_init(WATCHDOG_TIMEOUT_S, true);
 
 	printf("Creatign a new task.\n");
-
-	xTaskCreate(myTask,	// Task code
-				"My Task", // Name of task
-				2048,	  // Stack size
-				NULL,	  // Task data
-				1,		   // Priority
-				NULL	   // task handle
-	);
+	xTaskCreate(myTask, "My Task", 2048, NULL, 1, NULL );
 }
